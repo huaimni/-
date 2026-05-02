@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙根撸记</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --skin-color: #ffb7a1;
+            --skin-dark: #e89b85;
+            --head-color: #ff8a8a;
+            --head-dark: #f07575;
+        }
+        body {
+            background-color: #0a0a0a;
+            color: #e2e8f0;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        
+        /* 拟人化造型容器 */
+        .shaft-container {
+            position: relative;
+            width: 80px;
+            height: 320px;
+            margin: 0 auto;
+        }
+
+        /* 底部优化 */
+        .base-parts {
+            position: absolute;
+            bottom: -35px;
+            width: 160px;
+            left: -40px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 5;
+        }
+        .testi {
+            width: 75px;
+            height: 75px;
+            background: radial-gradient(circle at 30% 30%, var(--skin-color), var(--skin-dark));
+            border-radius: 50%;
+            box-shadow: inset -8px -8px 20px rgba(0,0,0,0.4), 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        /* 柱体：增加侧向阴影和质感 */
+        .shaft {
+            position: absolute;
+            bottom: 0;
+            width: 80px;
+            height: 290px;
+            background: linear-gradient(to right, 
+                rgba(0,0,0,0.15) 0%, 
+                var(--skin-color) 20%, 
+                var(--skin-color) 80%, 
+                rgba(0,0,0,0.2) 100%
+            );
+            background-color: var(--skin-color);
+            border-radius: 40px 40px 15px 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+            z-index: 10;
+        }
+
+        /* 顶部：强化冠状沟视觉 */
+        .glans {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 65px;
+            background: radial-gradient(circle at 50% 40%, var(--head-color), var(--head-dark));
+            border-radius: 45% 45% 35% 35%;
+            border-bottom: 5px solid rgba(139, 0, 0, 0.25);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 11;
+        }
+
+        /* 顶部缝隙细节 */
+        .glans::before {
+            content: "";
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            width: 3px;
+            height: 14px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 2px;
+            transform: translateX(-50%);
+        }
+
+        /* 充血进度条 */
+        #progress-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, #ff3333, #ff0000);
+            opacity: 0.7;
+            transition: height 0.1s ease-out;
+            z-index: 12;
+        }
+
+        /* 撸动交互动画 */
+        .stroke-animation {
+            animation: strokeAction 0.12s ease-in-out;
+        }
+        @keyframes strokeAction {
+            0% { transform: translateY(0) scaleX(1); }
+            50% { transform: translateY(15px) scaleX(1.04); }
+            100% { transform: translateY(0) scaleX(1); }
+        }
+
+        /* 极度兴奋震动 */
+        @keyframes finalShake {
+            0%, 100% { transform: translate(0,0); }
+            25% { transform: translate(4px, 4px); }
+            75% { transform: translate(-4px, -4px); }
+        }
+        .extreme-shaking {
+            animation: finalShake 0.04s infinite;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen">
+
+    <canvas id="fireworks"></canvas>
+
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-black tracking-widest text-red-600 mb-4">《撸记》</h1>
+        <div class="text-gray-500 italic space-y-1">
+            <p>“每晚撸之，撸之撸之...”</p>
+        </div>
+    </div>
+
+    <div id="target-area" class="shaft-container mb-20">
+        <div class="base-parts">
+            <div class="testi"></div>
+            <div class="testi"></div>
+        </div>
+        <div id="shaft-body" class="shaft">
+            <div class="glans"></div>
+            <div id="progress-fill"></div>
+        </div>
+    </div>
+
+    <div class="flex flex-col items-center">
+        <button id="btn-stroke" class="bg-white text-black font-black py-5 px-16 rounded-2xl text-2xl shadow-[0_10px_0_#999] active:shadow-none active:translate-y-[10px] transition-all">
+            撸 之 ！
+        </button>
+        <p id="percent-display" class="mt-6 text-xl font-mono text-gray-600">快感：0%</p>
+    </div>
+
+    <!-- 成功后的全屏提示 -->
+    <div id="finish-overlay" class="fixed inset-0 bg-white flex items-center justify-center hidden z-[200]">
+        <h2 class="text-9xl font-black text-black animate-bounce">爽也</h2>
+    </div>
+
+    <script>
+        const btn = document.getElementById('btn-stroke');
+        const shaft = document.getElementById('shaft-body');
+        const fill = document.getElementById('progress-fill');
+        const percentText = document.getElementById('percent-display');
+        const overlay = document.getElementById('finish-overlay');
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+
+        let energy = 0;
+        let particles = [];
+        let isDone = false;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.onresize = resize;
+        resize();
+
+        // 粒子类：负责最后的喷发效果
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 20;
+                this.vy = Math.random() * -25 - 15;
+                this.life = 1;
+                this.gravity = 0.5;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.life})`;
+                ctx.fill();
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity;
+                this.life -= 0.008;
+            }
+        }
+
+        // 渲染循环
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+        // 按钮点击逻辑
+        btn.addEventListener('click', () => {
+            if (isDone) return;
+
+            energy += 5; // 每次点击增加的百分比
+            if (energy > 100) energy = 100;
+
+            // 触发 CSS 动画
+            shaft.classList.remove('stroke-animation');
+            void shaft.offsetWidth; // 触发强制重绘
+            shaft.classList.add('stroke-animation');
+
+            update();
+        });
+
+        // 更新画面数据
+        function update() {
+            fill.style.height = energy + '%';
+            percentText.innerText = `快感：${Math.floor(energy)}%`;
+
+            // 高能量时的视觉反馈
+            if (energy > 80) {
+                shaft.classList.add('extreme-shaking');
+            } else {
+                shaft.classList.remove('extreme-shaking');
+            }
+
+            if (energy >= 100) {
+                success();
+            }
+        }
+
+        // 成功状态
+        function success() {
+            isDone = true;
+            const rect = shaft.getBoundingClientRect();
+            const spawnX = rect.left + rect.width / 2;
+            const spawnY = rect.top + 20;
+
+            // 喷射粒子
+            for (let i = 0; i < 120; i++) {
+                setTimeout(() => {
+                    particles.push(new Particle(spawnX, spawnY));
+                }, i * 4);
+            }
+
+            // 显示全屏提示
+            setTimeout(() => {
+                overlay.classList.remove('hidden');
+                setTimeout(reset, 3000); // 3秒后重置
+            }, 1000);
+        }
+
+        // 重置游戏
+        function reset() {
+            energy = 0;
+            isDone = false;
+            overlay.classList.add('hidden');
+            update();
+        }
+
+        // 自动衰减逻辑（模拟冷却）
+        setInterval(() => {
+            if (energy > 0 && !isDone) {
+                energy -= 0.4;
+                update();
+            }
+        }, 100);
+    </script>
+</body>
+</html>
