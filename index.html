@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -11,9 +12,9 @@
             --skin-dark: #e89b85;
             --head-color: #ff8a8a;
             --head-dark: #f07575;
-            --blood-color: rgba(220, 20, 60, 0.4); /* 充血色 */
+            --blood-color: rgba(220, 20, 60, 0.4);
         }
-        
+
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
@@ -52,7 +53,7 @@
         .shaft-container {
             position: relative;
             width: 80px;
-            height: 350px; 
+            height: 350px;
             margin-bottom: 20px;
         }
 
@@ -71,31 +72,27 @@
             height: 70px;
             background: radial-gradient(circle at 30% 30%, var(--skin-color), var(--skin-dark));
             border-radius: 50%;
-            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.4), 0 5px 15px rgba(0,0,0,0.5);
+            box-shadow: inset -5px -5px 15px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.5);
         }
 
-        /* 整个主体的容器，用于统一裁剪充血层 */
         .shaft-wrapper {
             position: absolute;
             bottom: 0;
             width: 80px;
             height: 320px;
             z-index: 10;
-            /* 关键：确保内部所有层（包括充血层）都被裁剪成这个形状 */
             border-radius: 40px 40px 15px 15px;
             overflow: hidden;
             background-color: var(--skin-color);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
         }
 
-        /* 基础皮肤层 */
         .shaft-skin {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to right, rgba(0,0,0,0.1) 0%, var(--skin-color) 20%, var(--skin-color) 80%, rgba(0,0,0,0.15) 100%);
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.1) 0%, var(--skin-color) 20%, var(--skin-color) 80%, rgba(0, 0, 0, 0.15) 100%);
         }
 
-        /* 龟头层 - 放在充血层下面或上面取决于你想要的视觉效果，这里放在下面 */
         .glans {
             position: absolute;
             top: 0;
@@ -118,18 +115,16 @@
             border-radius: 50%;
         }
 
-        /* 充血层：覆盖全身 */
         #progress-fill {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 0%; /* 初始高度为0 */
+            height: 0%;
             background: linear-gradient(to top, rgba(255, 0, 50, 0.6), rgba(255, 100, 100, 0.3));
             z-index: 10;
             pointer-events: none;
             transition: height 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-            /* 增加一点发光感 */
             box-shadow: 0 0 15px rgba(255, 0, 0, 0.2) inset;
         }
 
@@ -144,19 +139,44 @@
             padding-bottom: 20px;
         }
 
-        .stroke-animation { animation: strokeAction 0.1s ease-in-out; }
-        @keyframes strokeAction {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(18px) scaleX(1.03); }
-            100% { transform: translateY(0); }
+        .stroke-animation {
+            animation: strokeAction 0.1s ease-in-out;
         }
 
-        .extreme-shaking { animation: finalShake 0.04s infinite; }
+        @keyframes strokeAction {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(18px) scaleX(1.03);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .extreme-shaking {
+            animation: finalShake 0.04s infinite;
+        }
+
         @keyframes finalShake {
-            0% { transform: translate(1px, 1px); }
-            33% { transform: translate(-2px, 0px); }
-            66% { transform: translate(1px, -2px); }
-            100% { transform: translate(0px, 1px); }
+            0% {
+                transform: translate(1px, 1px);
+            }
+
+            33% {
+                transform: translate(-2px, 0px);
+            }
+
+            66% {
+                transform: translate(1px, -2px);
+            }
+
+            100% {
+                transform: translate(0px, 1px);
+            }
         }
 
         canvas {
@@ -168,11 +188,12 @@
         }
 
         #finish-overlay {
-            background: rgba(255,255,255,0.92);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(10px);
         }
     </style>
 </head>
+
 <body>
 
     <canvas id="fireworks"></canvas>
@@ -188,15 +209,11 @@
                 <div class="testi"></div>
                 <div class="testi"></div>
             </div>
-            <!-- 主体包装 -->
             <div id="shaft-body" class="shaft-wrapper">
-                <!-- 皮肤基础 -->
                 <div class="shaft-skin"></div>
-                <!-- 龟头（在内部） -->
                 <div class="glans">
                     <div class="meatus"></div>
                 </div>
-                <!-- 充血进度层（覆盖在皮肤和龟头之上） -->
                 <div id="progress-fill"></div>
             </div>
         </div>
@@ -204,7 +221,8 @@
 
     <div class="footer">
         <p id="percent-display" class="mb-4 text-2xl font-mono font-bold text-red-500">快感：0%</p>
-        <button id="btn-stroke" class="bg-white text-black font-black py-4 px-14 rounded-2xl text-2xl shadow-[0_8px_0_#999] active:shadow-none active:translate-y-[8px] transition-all outline-none">
+        <button id="btn-stroke"
+            class="bg-white text-black font-black py-4 px-14 rounded-2xl text-2xl shadow-[0_8px_0_#999] active:shadow-none active:translate-y-[8px] transition-all outline-none">
             撸 之 ！
         </button>
     </div>
@@ -268,7 +286,7 @@
                 this.y += this.vy;
                 this.vy += this.gravity;
                 this.life -= 0.006;
-                if(this.radius > 0.5) this.radius -= 0.01;
+                if (this.radius > 0.5) this.radius -= 0.01;
             }
         }
 
@@ -297,11 +315,11 @@
 
             if (isDone) {
                 const pos = getMouthPos();
-                for(let i=0; i<10; i++) particles.push(new Particle(pos.x, pos.y, 0.6));
+                for (let i = 0; i < 10; i++) particles.push(new Particle(pos.x, pos.y, 0.6));
                 return;
             }
 
-            energy += 5.5; // 稍微快一点点
+            energy += 5.5;
             if (energy > 100) energy = 100;
             updateUI();
         });
@@ -309,9 +327,8 @@
         function updateUI() {
             fill.style.height = energy + '%';
             percentText.innerText = `快感：${Math.floor(energy)}%`;
-            
-            // 颜色随着能量变深
-            fill.style.backgroundColor = `rgba(220, 20, 60, ${0.2 + (energy/100) * 0.4})`;
+
+            fill.style.backgroundColor = `rgba(220, 20, 60, ${0.2 + (energy / 100) * 0.4})`;
 
             if (energy > 85) {
                 shaft.classList.add('extreme-shaking');
@@ -325,23 +342,23 @@
 
         async function ejaculateProcess() {
             isDone = true;
-            
+
             spawnBurst(70, 1.5);
             await sleep(450);
-            
+
             spawnBurst(60, 1.2);
             await sleep(550);
-            
+
             spawnBurst(90, 1.0);
 
             await sleep(1000);
 
             overlay.classList.remove('hidden');
-            
+
             setTimeout(() => {
                 shaft.classList.remove('extreme-shaking');
-                reset(); 
-            }, 2000); 
+                reset();
+            }, 2000);
         }
 
         function spawnBurst(num, power) {
@@ -349,9 +366,9 @@
             let count = 0;
             const interval = setInterval(() => {
                 particles.push(new Particle(pos.x, pos.y, power));
-                particles.push(new Particle(pos.x + (Math.random()-0.5)*8, pos.y, power * 0.85));
+                particles.push(new Particle(pos.x + (Math.random() - 0.5) * 8, pos.y, power * 0.85));
                 count += 2;
-                if(count >= num) clearInterval(interval);
+                if (count >= num) clearInterval(interval);
             }, 12);
         }
 
@@ -364,7 +381,6 @@
             updateUI();
         }
 
-        // 能量自然衰减
         setInterval(() => {
             if (energy > 0 && !isDone) {
                 energy -= 0.7;
@@ -373,4 +389,5 @@
         }, 200);
     </script>
 </body>
+
 </html>
